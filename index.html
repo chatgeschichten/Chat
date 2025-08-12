@@ -163,14 +163,27 @@
 
   <!-- Supabase + App Script -->
   <script type="module">
-    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
+  import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-    // ====== Konfig (aus Netlify Env ins Frontend kopieren, falls nicht über HTML-Templating):
-    const SUPABASE_URL = '{{https://lxytgjltgcuukppovydp.supabase.co}}';
-    const SUPABASE_ANON_KEY = '{{eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imx4eXRnamx0Z2N1dWtwcG92eWRwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTQ5NzkxNjIsImV4cCI6MjA3MDU1NTE2Mn0.n9mHQZXS-XXuNJFTZwTeB1znLhZ-ZbkmXwHjpYrS3uo}}';
-    // Wenn du kein Templating nutzt, ersetze die Platzhalter manuell:
-    // const SUPABASE_URL = 'https://YOURPROJECT.supabase.co';
-    // const SUPABASE_ANON_KEY = 'ey...';
+  // 1) Env-Werte sicher aus Netlify holen
+  async function getEnv() {
+    const r = await fetch('/.netlify/functions/env', { cache: 'no-store' });
+    if (!r.ok) throw new Error('Env nicht verfügbar');
+    return r.json();
+  }
+
+  // 2) App Bootstrap: erst Env, dann Supabase-Client, dann UI initialisieren
+  let supa = null;
+  let session = null;
+
+  try {
+    const cfg = await getEnv();
+    supa = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
+  } catch (e) {
+    alert('Fehler: Supabase-Konfiguration fehlt.\n' + e.message);
+    // Brich NICHT komplett ab: zeig zumindest die Startseite
+  }
+
 
     const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -468,4 +481,5 @@
   </script>
 </body>
 </html>
+
 
