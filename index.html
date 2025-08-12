@@ -2,131 +2,107 @@
 <html lang="de">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>KI‑Chat • WhatsApp Dark</title>
   <meta name="theme-color" content="#0b141a" />
   <style>
-    /* ===== WhatsApp Dark Palette ===== */
     :root{
-      --bg:#0b141a;        /* App-Hintergrund */
-      --panel:#111b21;     /* Chat-Fläche */
-      --panel2:#0a1014;    /* Sidebar / Header */
-      --in:#202c33;        /* eingehende Bubble */
-      --out:#005c4b;       /* ausgehende Bubble (grün) */
-      --out-acc:#128c7e;   /* helleres Grün */
-      --text:#e9edef;      /* Primärtext */
-      --muted:#8696a0;     /* Sekundär */
-      --accent:#25d366;    /* WhatsApp Grün */
-      --accent-ghost:#1a4e43; /* Hover/Focus */
-      --border:#1f2c34;    /* Kanten */
-      --narr:#182229;      /* System/Meta */
-      --danger:#ff5c70;
+      --bg:#0b141a; --panel:#111b21; --panel2:#0a1014;
+      --in:#202c33; --out:#005c4b; --out-acc:#128c7e;
+      --text:#e9edef; --muted:#8696a0; --accent:#25d366;
+      --border:#1f2c34; --narr:#182229; --danger:#ff5c70;
     }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-
-    /* ===== Layout ===== */
-    .app{display:grid;grid-template-columns:340px 1fr;height:100dvh;}
+    /* Layout */
+    .app{display:grid;grid-template-columns:340px 1fr;height:100dvh}
     @media(max-width:1000px){ .app{grid-template-columns:1fr} }
-
-    .sidebar{background:var(--panel2);border-right:1px solid var(--border);display:flex;flex-direction:column}
+    .sidebar{background:var(--panel2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative}
     .side-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)}
     .side-title{font-weight:600}
-    .search{margin:10px 12px}
-    .search input{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--border);background:#0e171f;color:var(--text)}
     .chatlist{flex:1;overflow:auto}
     .chat-item{display:flex;gap:10px;align-items:center;padding:10px 12px;border-bottom:1px solid #0e171f;cursor:pointer}
     .chat-item:hover{background:#0e171f}
-    .avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#0e171f;display:flex;align-items:center;justify-content:center;font-size:20px}
+    .avatar{width:40px;height:40px;border-radius:50%;object-fit:cover;background:#0e171f;display:flex;align-items:center;justify-content:center;font-size:18px}
     .ci-main{flex:1;min-width:0}
     .ci-name{font-size:14px;font-weight:600}
     .ci-last{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
     .ci-meta{font-size:11px;color:var(--muted)}
-
-    .main{display:flex;flex-direction:column;background:var(--panel)}
-    .header{display:flex;align-items:center;gap:10px;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--panel2);position:sticky;top:0;z-index:5}
+    .main{display:flex;flex-direction:column;background:var(--panel);height:100%}
+    .topbar{position:sticky;top:0;z-index:5;background:var(--panel2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;padding:10px}
+    .top-left{display:flex;align-items:center;gap:8px}
+    .hamburger{border:none;background:transparent;font-size:20px;color:var(--text);cursor:pointer}
     .h-avatar{width:36px;height:36px;border-radius:50%;object-fit:cover;background:#0e171f;display:flex;align-items:center;justify-content:center}
     .h-meta{display:flex;flex-direction:column}
     .h-name{font-weight:600}
     .h-status{font-size:12px;color:var(--muted)}
-    .toggle-sidebar{margin-left:auto;border:1px solid var(--border);background:#0e171f;color:var(--text);border-radius:10px;padding:8px 10px;display:none}
-    @media(max-width:1000px){ .toggle-sidebar{display:block} }
-
+    .top-right{margin-left:auto;display:flex;gap:6px}
+    .btn{border:1px solid var(--border);background:#0e171f;color:var(--text);padding:8px 10px;border-radius:10px;cursor:pointer}
+    .btn.primary{border-color:var(--out-acc);background:var(--out)}
     .messages{flex:1;overflow:auto;padding:16px;display:flex;flex-direction:column;gap:8px}
-    .row{display:flex;gap:6px}
     .bubble{max-width:78%;padding:10px 13px;border-radius:16px;line-height:1.35;font-size:15px;position:relative;word-wrap:break-word}
     .in{align-self:flex-start;background:var(--in)}
     .out{align-self:flex-end;background:var(--out)}
-    .out:after{content:'';position:absolute;right:6px;bottom:-2px;width:10px;height:10px;background:var(--out);transform:rotate(45deg)}
-    .meta{font-size:11px;color:var(--muted);margin:0 6px}
     .system{align-self:center;background:var(--narr);border:1px solid var(--border);max-width:90%;font-style:italic}
-
     .composer{display:flex;gap:8px;padding:10px;border-top:1px solid var(--border);background:var(--panel2)}
     .composer input{flex:1;border-radius:20px;border:1px solid var(--border);padding:12px 14px;background:#0e171f;color:var(--text)}
     .send{border-radius:20px;border:1px solid var(--out-acc);background:var(--out);color:var(--text);padding:10px 14px;cursor:pointer}
     .send:hover{background:var(--out-acc)}
-
     .typing{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
     .typing-dots{display:inline-flex;gap:2px}
     .typing-dots span{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;opacity:.5;animation:blink 1s infinite}
     .typing-dots span:nth-child(2){animation-delay:.15s}
     .typing-dots span:nth-child(3){animation-delay:.3s}
     @keyframes blink{0%,80%,100%{opacity:.2}40%{opacity:1}}
-
-    /* ===== Start Screen ===== */
-    .start{position:fixed;inset:0;background:var(--panel2);display:flex;align-items:center;justify-content:center;padding:20px}
+    /* Start */
+    .start{position:fixed;inset:0;background:var(--panel2);display:flex;align-items:center;justify-content:center;padding:20px;z-index:30}
     .start-inner{max-width:980px;width:100%;display:grid;grid-template-columns:300px 1fr;gap:18px}
     @media(max-width:900px){.start-inner{grid-template-columns:1fr}}
     .card{background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden}
     .card h2{margin:0;padding:14px;border-bottom:1px solid var(--border)}
     .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:12px;padding:12px}
     .char{border:1px solid var(--border);border-radius:14px;background:#0e171f;overflow:hidden;cursor:pointer}
-    .char:hover{outline:2px solid var(--accent-ghost)}
+    .char:hover{outline:2px solid #1a4e43}
     .char-top{display:flex;gap:10px;padding:12px;align-items:center}
     .char .avatar{width:44px;height:44px}
     .char-name{font-weight:600}
     .char-key{font-size:12px;color:var(--muted)}
     .char-desc{padding:10px 12px;border-top:1px solid #0e171f;font-size:13px;color:var(--muted);display:none}
     .char.open .char-desc{display:block}
-
-    /* Custom Character Modal */
-    .modal{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;padding:16px;z-index:40}
-    .modal.show{display:flex}
-    .modal-card{width:100%;max-width:520px;background:var(--panel);border:1px solid var(--border);border-radius:16px;overflow:hidden}
-    .modal-head{display:flex;justify-content:space-between;align-items:center;padding:12px 14px;border-bottom:1px solid var(--border)}
-    .modal-body{display:flex;flex-direction:column;gap:10px;padding:12px 14px}
-    .modal-body input, .modal-body textarea, .modal-body select{border:1px solid var(--border);background:#0e171f;color:var(--text);border-radius:10px;padding:10px}
-    .actions{display:flex;gap:10px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border)}
-    .btn{border:1px solid var(--border);background:#0e171f;color:var(--text);padding:10px 12px;border-radius:10px;cursor:pointer}
-    .btn.primary{border-color:var(--out-acc);background:var(--out)}
-    .btn.primary:hover{background:var(--out-acc)}
-
-    /* Mobile: Sidebar overlay */
-    .sidebar.overlay{position:fixed;inset:0 30% 0 0;z-index:50;transform:translateX(-100%);transition:.2s transform}
-    .sidebar.overlay.show{transform:translateX(0)}
-    @media(min-width:1001px){ .sidebar.overlay{display:none} }
+    /* Sidebar-Overlay mobil */
+    .side-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:40}
+    .side-drawer{position:absolute;left:0;top:0;bottom:0;width:86%;max-width:360px;background:var(--panel2);border-right:1px solid var(--border);transform:translateX(-100%);transition:.2s transform}
+    .side-overlay.show{display:block}
+    .side-overlay.show .side-drawer{transform:translateX(0)}
   </style>
 </head>
 <body>
   <div class="app">
-    <aside class="sidebar" id="sidebarMain">
+    <!-- Sidebar (Desktop) -->
+    <aside class="sidebar" id="sidebarDesk">
       <div class="side-header">
         <div class="side-title">Chats</div>
         <button class="btn" id="newChatBtn" style="margin-left:auto">+ Neuer Chat</button>
       </div>
-      <div class="search"><input id="search" placeholder="Suchen…" /></div>
       <div class="chatlist" id="chatList"></div>
     </aside>
 
+    <!-- Main -->
     <section class="main">
-      <div class="header">
-        <div class="h-avatar" id="hAvatar">💬</div>
-        <div class="h-meta">
-          <div class="h-name" id="hName">Kein Chat ausgewählt</div>
-          <div class="h-status" id="hStatus">—</div>
+      <div class="topbar">
+        <div class="top-left">
+          <button class="hamburger" id="btnHamburger">≡ Chats</button>
+          <div class="h-avatar" id="hAvatar">💬</div>
+          <div class="h-meta">
+            <div class="h-name" id="hName">Kein Chat ausgewählt</div>
+            <div class="h-status" id="hStatus">—</div>
+          </div>
         </div>
-        <button class="toggle-sidebar" id="toggleSide">Chats</button>
+        <div class="top-right">
+          <button class="btn" id="btnLogin">Login</button>
+          <button class="btn" id="btnLogout" style="display:none">Logout</button>
+        </div>
       </div>
 
       <div class="messages" id="msgs"></div>
@@ -138,7 +114,18 @@
     </section>
   </div>
 
-  <!-- Start Screen: Charakterwahl -->
+  <!-- Mobile Sidebar Overlay -->
+  <div class="side-overlay" id="sideOverlay">
+    <div class="side-drawer">
+      <div class="side-header">
+        <div class="side-title">Chats</div>
+        <button class="btn" id="btnCloseSide" title="schließen">✕</button>
+      </div>
+      <div class="chatlist" id="chatListMobile"></div>
+    </div>
+  </div>
+
+  <!-- Startscreen -->
   <div class="start" id="start">
     <div class="start-inner">
       <div class="card">
@@ -149,312 +136,335 @@
         <h2 style="padding-left:12px">Eigenen Charakter erstellen</h2>
         <div style="padding:12px">
           <button class="btn primary" id="openCustom">+ Eigenen Charakter erstellen</button>
-          <p class="muted" style="color:var(--muted);font-size:13px;margin-top:8px">Du vergibst Name, „Schlagwort“ (z. B. „Flirt“, „Coach“) und eine kurze Beschreibung. Optional lädst du ein eigenes Profilbild hoch.</p>
+          <p style="color:var(--muted);font-size:13px;margin-top:8px">Name, Schlagwort und Beschreibung festlegen. Optional Profilbild hochladen.</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Custom Character -->
-  <div class="modal" id="modal">
-    <div class="modal-card">
-      <div class="modal-head">
+  <!-- Modal: Custom Character (leichtgewichtig) -->
+  <dialog id="dlgCustom" style="max-width:520px;width:92%;border:none;border-radius:16px;padding:0;background:var(--panel);color:var(--text)">
+    <form method="dialog" style="margin:0">
+      <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
         <div>Eigenen Charakter anlegen</div>
-        <button class="btn" id="closeModal">×</button>
+        <button class="btn" value="cancel">×</button>
       </div>
-      <div class="modal-body">
-        <label>Name</label>
-        <input id="cName" placeholder="z. B. Lena" />
-        <label>Schlagwort</label>
-        <input id="cTag" placeholder="z. B. Flirt, Freund, Coach" />
-        <label>Kurzbeschreibung (wird als Stil benutzt)</label>
-        <textarea id="cDesc" rows="4" placeholder="Wie soll die Person sprechen/handeln? (freundlich, leicht frech, motivierend, jugendfreundlich, kein Rollenspiel mit Sternchen)"></textarea>
-        <label>Profilbild (optional)</label>
-        <input id="cImg" type="file" accept="image/*" />
+      <div style="display:flex;flex-direction:column;gap:10px;padding:12px 14px">
+        <label>Name</label><input id="cName" placeholder="z. B. Lena" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px">
+        <label>Schlagwort</label><input id="cTag" placeholder="z. B. Flirt, Freund, Coach" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px">
+        <label>Beschreibung</label><textarea id="cDesc" rows="4" placeholder="Wie spricht die Person? (kurz, locker, jugendfreundlich, kein *Rollenspiel*)" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px"></textarea>
       </div>
-      <div class="actions">
-        <button class="btn" id="cancelModal">Abbrechen</button>
-        <button class="btn primary" id="saveChar">Charakter speichern & Chat starten</button>
+      <div style="display:flex;gap:10px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border)">
+        <button class="btn" value="cancel">Abbrechen</button>
+        <button class="btn primary" id="saveChar" value="default">Speichern & Chat starten</button>
       </div>
-    </div>
-  </div>
+    </form>
+  </dialog>
 
-<script>
-/********************
- * State & Storage  *
- ********************/
-const $ = (q)=>document.querySelector(q);
-const chatListEl = $('#chatList');
-const msgsEl = $('#msgs');
-const inputEl = $('#input');
-const sendBtn = $('#send');
-const startEl = $('#start');
-const presetGrid = $('#presetGrid');
-const hName = $('#hName');
-const hStatus = $('#hStatus');
-const hAvatar = $('#hAvatar');
-const newChatBtn = $('#newChatBtn');
-const toggleSide = $('#toggleSide');
+  <!-- Supabase + App Script -->
+  <script type="module">
+    import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-const modal = $('#modal');
-const openCustom = $('#openCustom');
-const closeModal = $('#closeModal');
-const cancelModal = $('#cancelModal');
-const saveChar = $('#saveChar');
-const cName = $('#cName');
-const cTag = $('#cTag');
-const cDesc = $('#cDesc');
-const cImg = $('#cImg');
+    // ====== Konfig (aus Netlify Env ins Frontend kopieren, falls nicht über HTML-Templating):
+    const SUPABASE_URL = '{{SUPABASE_URL}}';
+    const SUPABASE_ANON_KEY = '{{SUPABASE_ANON_KEY}}';
+    // Wenn du kein Templating nutzt, ersetze die Platzhalter manuell:
+    // const SUPABASE_URL = 'https://YOURPROJECT.supabase.co';
+    // const SUPABASE_ANON_KEY = 'ey...';
 
-let state = {
-  chats: {}, // id -> { id, persona, avatar, name, tag, desc, history:[{role:'you'|'ai'|'system', text}] }
-  currentId: null
-};
+    const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-const LS_KEY = 'kiwa-chats-v1';
-function loadState(){ try{ const raw = localStorage.getItem(LS_KEY); if(raw){ state = JSON.parse(raw);} }catch{} }
-function saveState(){ localStorage.setItem(LS_KEY, JSON.stringify(state)); }
+    // ====== UI-Refs
+    const $ = (q)=>document.querySelector(q);
+    const chatListDesk = $('#chatList');
+    const chatListMob  = $('#chatListMobile');
+    const msgsEl = $('#msgs');
+    const inputEl = $('#input');
+    const sendBtn = $('#send');
+    const startEl = $('#start');
+    const presetGrid = $('#presetGrid');
+    const hName = $('#hName'); const hStatus = $('#hStatus'); const hAvatar = $('#hAvatar');
+    const btnHamburger = $('#btnHamburger');
+    const sideOverlay = $('#sideOverlay'); const btnCloseSide = $('#btnCloseSide');
+    const btnLogin = $('#btnLogin'); const btnLogout = $('#btnLogout');
+    const dlgCustom = $('#dlgCustom'); const openCustom = $('#openCustom'); const saveChar = $('#saveChar');
+    const newChatBtn = $('#newChatBtn');
 
-/********************
- * Preset Characters *
- ********************/
-const PRESETS = [
-  { key:'ratgeber', name:'Der Ratgeber', tag:'Coach', avatar:'💡',
-    desc:'Gibt hilfreiche, konkrete Tipps. Ruhiger, positiver Ton. Kurze, klare Antworten ohne Sternchen.' },
-  { key:'freund', name:'Bester Freund', tag:'Buddy', avatar:'👋',
-    desc:'Locker, witzig, ehrlich. Reagiert empathisch und direkt, kein Rollenspiel, einfach chatten.' },
-  { key:'nachbarin', name:'Heiße Nachbarin', tag:'Flirt', avatar:'🔥',
-    desc:'Charmant, frech, aber respektvoll (jugendfreundlich). Leicht flirty, keine expliziten Inhalte.' },
-  { key:'mysterio', name:'Geheimnisvoller Fremder', tag:'Mystery', avatar:'🕵️',
-    desc:'Knapp, rätselhaft, baut Spannung auf. Stellt Gegenfragen, ohne zu nerven.' },
-  { key:'spass', name:'Spaßvogel', tag:'Comedy', avatar:'😂',
-    desc:'Humorvoll, gerne Memes/Emojis. Kurze Punchlines. Kein roher Humor.' },
-];
+    // ====== App State
+    const PRESETS = [
+      { key:'ratgeber', name:'Der Ratgeber', tag:'Coach', avatar:'💡',
+        desc:'Gibt konkrete Tipps. Ruhig, positiv. Kurze Antworten ohne Sternchen.' },
+      { key:'freund', name:'Bester Freund', tag:'Buddy', avatar:'👋',
+        desc:'Locker, witzig, empathisch. Einfach chatten, kein Rollenspiel.' },
+      { key:'nachbarin', name:'Heiße Nachbarin', tag:'Flirt', avatar:'🔥',
+        desc:'Charmant, leicht frech, respektvoll (jugendfreundlich).' },
+      { key:'mysterio', name:'Geheimnisvoller Fremder', tag:'Mystery', avatar:'🕵️',
+        desc:'Rätselhaft, Andeutungen, kurze Gegenfragen.' },
+      { key:'spass', name:'Spaßvogel', tag:'Comedy', avatar:'😂',
+        desc:'Humor, Emojis sparsam. Kurze Punchlines.' },
+    ];
 
-function renderPresets(){
-  presetGrid.innerHTML = '';
-  PRESETS.forEach(p => {
-    const card = document.createElement('div');
-    card.className = 'char';
-    card.innerHTML = `
-      <div class="char-top">
-        <div class="avatar">${p.avatar}</div>
-        <div>
-          <div class="char-name">${p.name}</div>
-          <div class="char-key">${p.tag}</div>
-        </div>
-        <button class="btn" style="margin-left:auto">Details</button>
-      </div>
-      <div class="char-desc">${p.desc}</div>
-    `;
-    const btn = card.querySelector('.btn');
-    btn.addEventListener('click', ()=> card.classList.toggle('open'));
-    card.addEventListener('dblclick', ()=> startChatFromPreset(p));
-    presetGrid.appendChild(card);
-  });
-}
+    let session = null;
+    let currentChat = null; // {id, name, tag, desc, avatar_url, persona_id}
 
-function startChatFromPreset(p){
-  const id = 'c'+Date.now();
-  state.chats[id] = {
-    id,
-    persona: p.key,
-    avatar: p.avatar,
-    name: p.name,
-    tag: p.tag,
-    desc: p.desc,
-    history: []
-  };
-  state.currentId = id; saveState();
-  startEl.style.display='none';
-  renderSidebar();
-  renderChat();
-  // Begrüßung vom Bot anfordern
-  requestAI({ start:true });
-}
+    // ====== Auth
+    btnLogin.onclick = async () => {
+      const email = prompt('E-Mail für Magic‑Link Login:');
+      if(!email) return;
+      const { error } = await supa.auth.signInWithOtp({ email });
+      if (error) alert('Login-Fehler: '+error.message);
+      else alert('Check deine E‑Mails – Magic Link wurde gesendet.');
+    };
+    btnLogout.onclick = async () => {
+      await supa.auth.signOut();
+      location.reload();
+    };
 
-/********************
- * Custom Character  *
- ********************/
-openCustom.addEventListener('click', ()=> modal.classList.add('show'));
-closeModal.addEventListener('click', ()=> modal.classList.remove('show'));
-cancelModal.addEventListener('click', ()=> modal.classList.remove('show'));
-
-saveChar.addEventListener('click', async ()=>{
-  const name = cName.value.trim() || 'Eigener Charakter';
-  const tag = cTag.value.trim() || 'Individuell';
-  const desc = cDesc.value.trim() || 'Freundlicher, natürlicher Chatstil. Kurze Antworten. Jugendfreundlich.';
-  let avatar = '🙂';
-  if(cImg.files && cImg.files[0]){
-    avatar = await fileToDataURL(cImg.files[0]);
-  }
-  const id = 'c'+Date.now();
-  state.chats[id] = { id, persona:'custom', avatar, name, tag, desc, history: [] };
-  state.currentId = id; saveState();
-  modal.classList.remove('show'); startEl.style.display='none';
-  renderSidebar(); renderChat(); requestAI({ start:true });
-});
-
-function fileToDataURL(file){
-  return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsDataURL(file); });
-}
-
-/********************
- * Sidebar / Chats   *
- ********************/
-function renderSidebar(filter=''){
-  const entries = Object.values(state.chats).sort((a,b)=>((b.history?.length||0)-(a.history?.length||0)));
-  chatListEl.innerHTML = '';
-  entries.forEach(ch=>{
-    if(filter && !(ch.name+ch.tag).toLowerCase().includes(filter.toLowerCase())) return;
-    const last = ch.history && ch.history.length ? ch.history[ch.history.length-1].text : 'Noch keine Nachrichten';
-    const item = document.createElement('div'); item.className='chat-item'; item.dataset.id=ch.id;
-    const av = document.createElement('div'); av.className='avatar';
-    if(String(ch.avatar||'').startsWith('data:')){ const img = new Image(); img.src = ch.avatar; img.className='avatar'; av.replaceWith(img); }
-    else av.textContent = ch.avatar||'💬';
-    const main = document.createElement('div'); main.className='ci-main';
-    const n = document.createElement('div'); n.className='ci-name'; n.textContent = ch.name;
-    const l = document.createElement('div'); l.className='ci-last'; l.textContent = last;
-    main.append(n,l);
-    const meta = document.createElement('div'); meta.className='ci-meta'; meta.textContent = ch.tag||'';
-
-    // append
-    const wrap = document.createElement('div'); wrap.style.display='contents';
-    const avatarNode = (String(ch.avatar||'').startsWith('data:'))? ( ()=>{ const img=new Image(); img.src=ch.avatar; img.className='avatar'; return img; })() : ( ()=>{ const d=document.createElement('div'); d.className='avatar'; d.textContent=ch.avatar||'💬'; return d; })();
-    item.append(avatarNode, main, meta);
-
-    item.addEventListener('click', ()=>{ state.currentId=ch.id; saveState(); renderSidebar(); renderChat(); });
-    if(ch.id===state.currentId){ item.style.background='#0e171f'; }
-    chatListEl.appendChild(item);
-  });
-}
-
-$('#search').addEventListener('input', (e)=> renderSidebar(e.target.value));
-newChatBtn.addEventListener('click', ()=>{ startEl.style.display='flex'; });
-toggleSide.addEventListener('click', ()=>{
-  // mobile overlay sidebar
-  let sb = document.getElementById('sidebarOverlay');
-  if(!sb){
-    sb = document.getElementById('sidebarMain').cloneNode(true);
-    sb.id='sidebarOverlay'; sb.classList.add('overlay'); document.body.appendChild(sb);
-  }
-  sb.classList.toggle('show');
-});
-
-/********************
- * Chat Rendering    *
- ********************/
-function renderChat(){
-  const ch = state.chats[state.currentId];
-  msgsEl.innerHTML='';
-  if(!ch){ hName.textContent='Kein Chat ausgewählt'; hStatus.textContent='—'; hAvatar.textContent='💬'; return; }
-  hName.textContent = ch.name;
-  hStatus.textContent = 'online';
-  if(String(ch.avatar||'').startsWith('data:')){
-    const img = new Image(); img.src = ch.avatar; img.className='h-avatar'; hAvatar.replaceWith(img); img.id='hAvatar';
-  } else { hAvatar.textContent = ch.avatar||'💬'; }
-
-  (ch.history||[]).forEach(m=> addBubble(m.role, m.text));
-  msgsEl.scrollTop = msgsEl.scrollHeight;
-}
-
-function addBubble(role, text){
-  const d = document.createElement('div');
-  if(role==='system'){ d.className='bubble system'; d.textContent = text; msgsEl.appendChild(d); return; }
-  d.className = 'bubble ' + (role==='you'?'out':'in');
-  d.innerText = text;
-  msgsEl.appendChild(d);
-}
-
-function showTyping(show){
-  const id='typingRow';
-  let r = document.getElementById(id);
-  if(show){
-    if(!r){
-      r = document.createElement('div'); r.id=id; r.className='row';
-      const b = document.createElement('div'); b.className='bubble in';
-      b.innerHTML = `<span class="typing">schreibt… <span class="typing-dots"><span></span><span></span><span></span></span></span>`;
-      r.appendChild(b); msgsEl.appendChild(r); msgsEl.scrollTop=msgsEl.scrollHeight;
-    }
-    hStatus.textContent='schreibt…';
-  } else {
-    if(r) r.remove(); hStatus.textContent='online';
-  }
-}
-
-/********************
- * Messaging / KI    *
- ********************/
-sendBtn.addEventListener('click', sendMessage);
-inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter'){ sendMessage(); }});
-
-function sendMessage(){
-  const ch = state.chats[state.currentId]; if(!ch) return;
-  const val = inputEl.value.trim(); if(!val) return;
-  inputEl.value='';
-  ch.history.push({role:'you', text:val});
-  saveState(); addBubble('you', val); msgsEl.scrollTop=msgsEl.scrollHeight;
-  requestAI({ userText: val });
-}
-
-async function requestAI(payload){
-  const ch = state.chats[state.currentId]; if(!ch) return;
-  showTyping(true);
-  try{
-    const setting = buildSettingFromPersona(ch);
-    const body = { 
-  	mode:'freechat',
-  	style:'Realistisch',
-  	setting,
-  	history: mapHistoryForAI(ch.history),
-  	payload,
-  	persona: { name: ch.name, tag: ch.tag, desc: ch.desc } // NEU: Persona klar übergeben
-	};
-
-    const res = await fetch('/.netlify/functions/ai', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
-    const txt = await res.text();
-    let data; try{ data = JSON.parse(txt); }catch{ data = { messages:[{role:'narrator', text:'(Antwort konnte nicht gelesen werden)'}] }; }
-    const msgs = Array.isArray(data.messages)? data.messages: [];
-    msgs.forEach(m=>{
-      if(m.role==='character' || m.role==='them'){ ch.history.push({role:'ai', text: m.text}); addBubble('ai', m.text); }
-      else if(m.role==='narrator'){ ch.history.push({role:'system', text: m.text}); addBubble('system', m.text); }
-      else { ch.history.push({role:'ai', text: m.text||''}); addBubble('ai', m.text||''); }
+    supa.auth.onAuthStateChange((_event, sess) => {
+      session = sess;
+      btnLogin.style.display = session ? 'none':'inline-block';
+      btnLogout.style.display = session ? 'inline-block':'none';
+      if(session){
+        startEl.style.display = 'flex'; // Auswahl erst nach Login
+        loadChats(); renderPresets();
+      }else{
+        startEl.style.display = 'flex';
+        renderPresets();
+      }
     });
-    saveState();
-  }catch(e){ addBubble('system', '⚠️ Fehler: '+e.message); }
-  finally{ showTyping(false); }
-}
 
-function mapHistoryForAI(hist){
-  // kompaktes Format: letzte 12 Einträge
-  const h = hist.slice(-12).map(m=>({ role: m.role==='you'?'user':'assistant', content: m.text }));
-  return h;
-}
+    // ====== Presets + Start
+    function renderPresets(){
+      presetGrid.innerHTML = '';
+      PRESETS.forEach(p => {
+        const card = document.createElement('div'); card.className='char';
+        card.innerHTML = `
+          <div class="char-top">
+            <div class="avatar">${p.avatar}</div>
+            <div><div class="char-name">${p.name}</div><div class="char-key">${p.tag}</div></div>
+            <button class="btn" style="margin-left:auto" type="button">Details</button>
+          </div>
+          <div class="char-desc">${p.desc}</div>`;
+        const btn = card.querySelector('.btn');
+        btn.addEventListener('click', ()=> card.classList.toggle('open'));
+        card.addEventListener('dblclick', ()=> startChatFromPreset(p));
+        presetGrid.appendChild(card);
+      });
+      openCustom.onclick = () => dlgCustom.showModal();
+      saveChar.onclick = async (e) => {
+        e.preventDefault();
+        const name = $('#cName').value.trim() || 'Eigener Charakter';
+        const tag  = $('#cTag').value.trim() || 'Individuell';
+        const desc = $('#cDesc').value.trim() || 'Freundlich, natürlich, kurz.';
+        await startChatWithPersona({ name, tag, description: desc, isCustom:true });
+        dlgCustom.close();
+      };
+    }
 
-function buildSettingFromPersona(ch){
-  // Wir kodieren Persona im Setting-Text, damit die bestehende Function (buildSystemPrompt) es übernimmt.
-  const base = `Rolle: ${ch.name} (${ch.tag}). Stil: ${ch.desc}. Wichtig: Antworte natürlich im Chat-Stil, deutsch, kurz und klar. Keine Sternchen/Regieanweisungen. Keine Fragen als Systemtext; stelle Fragen direkt wie in einem normalen Chat. Jugendfreundlich.`;
-  // kleine Zusätze pro Preset
-  switch(ch.persona){
-    case 'ratgeber': return base + ' Gib praktische, konkrete Tipps in 1–3 Sätzen.';
-    case 'freund': return base + ' Sei locker, humorvoll und empathisch.';
-    case 'nachbarin': return base + ' Flirte leicht, bleib respektvoll, kein expliziter Inhalt.';
-    case 'mysterio': return base + ' Sei rätselhaft, arbeite mit Andeutungen.';
-    case 'spass': return base + ' Setze pointierte Witze/Emojis sparsam ein.';
-    default: return base;
-  }
-}
+    newChatBtn.onclick = ()=> startEl.style.display='flex';
 
-/********************
- * Boot             *
- ********************/
-loadState();
-renderPresets();
-renderSidebar();
-renderChat();
+    // ====== Sidebar Overlay (mobil) + Desktop-Fixes
+    btnHamburger.onclick = () => { sideOverlay.classList.add('show'); };
+    btnCloseSide.onclick = () => { sideOverlay.classList.remove('show'); };
+    sideOverlay.addEventListener('click', (e)=>{
+      if(!e.target.closest('.side-drawer')) sideOverlay.classList.remove('show');
+    });
 
-// Falls es bereits Chats gibt: Startscreen ausblenden
-if(Object.keys(state.chats).length){ startEl.style.display='none'; }
-</script>
+    // ====== Chats laden/anzeigen
+    async function loadChats(){
+      if(!session) return;
+      const { data, error } = await supa
+        .from('chats')
+        .select('id, created_at, title, personas (id, name, tag, description, avatar_url)')
+        .order('created_at', { ascending:false });
+      if(error){ console.error(error); return; }
+      renderChatList(data || []);
+    }
+
+    function renderChatList(chats){
+      const render = (root)=>{
+        root.innerHTML='';
+        (chats||[]).forEach(row=>{
+          const persona = row.personas || {};
+          const item = document.createElement('div'); item.className='chat-item'; item.dataset.id = row.id;
+          const av = document.createElement('div'); av.className='avatar'; av.textContent = persona.avatar_url ? '' : (emojiFromTag(persona.tag)||'💬');
+          if(persona.avatar_url){ const img = new Image(); img.src = persona.avatar_url; img.className='avatar'; item.appendChild(img); }
+          else item.appendChild(av);
+          const main = document.createElement('div'); main.className='ci-main';
+          const n = document.createElement('div'); n.className='ci-name'; n.textContent = persona.name || row.title || 'Chat';
+          const l = document.createElement('div'); l.className='ci-last'; l.textContent = 'Tippe, um zu öffnen…';
+          main.append(n,l);
+          const meta = document.createElement('div'); meta.className='ci-meta'; meta.textContent = persona.tag||'';
+          item.append(main, meta);
+          item.onclick = ()=> openChat({ id: row.id, persona_id: persona.id, name: persona.name, tag: persona.tag, desc: persona.description, avatar_url: persona.avatar_url });
+          root.appendChild(item);
+        });
+      };
+      render(chatListDesk);
+      render(chatListMob);
+    }
+
+    function emojiFromTag(tag){
+      const t = (tag||'').toLowerCase();
+      if(t.includes('coach')) return '💡';
+      if(t.includes('buddy')||t.includes('freund')) return '👋';
+      if(t.includes('flirt')) return '🔥';
+      if(t.includes('myst')) return '🕵️';
+      if(t.includes('comedy')||t.includes('spaß')) return '😂';
+      return '💬';
+    }
+
+    // ====== Chat starten (Preset oder Custom)
+    async function startChatFromPreset(p){
+      const persona = { name: p.name, tag: p.tag, description: p.desc, avatar_url: '', is_preset: true };
+      await startChatWithPersona(persona);
+    }
+
+    async function startChatWithPersona({ name, tag, description, avatar_url = '', isCustom = false, is_preset = false }){
+      if(!session){ alert('Bitte einloggen.'); return; }
+
+      // Persona anlegen (einfache Duplikate erlaubt, pro User)
+      const { data: personaRow, error: pErr } = await supa
+        .from('personas')
+        .insert({ user_id: session.user.id, name, tag, description, avatar_url, is_preset })
+        .select().single();
+      if(pErr){ console.error(pErr); alert('Persona-Fehler'); return; }
+
+      // Chat anlegen
+      const { data: chatRow, error: cErr } = await supa
+        .from('chats')
+        .insert({ user_id: session.user.id, persona_id: personaRow.id, title: name })
+        .select('id, persona_id').single();
+      if(cErr){ console.error(cErr); alert('Chat-Fehler'); return; }
+
+      currentChat = { id: chatRow.id, persona_id: personaRow.id, name, tag, desc: description, avatar_url };
+      startEl.style.display='none';
+      sideOverlay.classList.remove('show');
+      renderHeader(); msgsEl.innerHTML=''; // leer
+      await requestAI({ start:true });
+      await loadChats();
+    }
+
+    // ====== Chat öffnen
+    async function openChat(meta){
+      currentChat = meta;
+      startEl.style.display='none';
+      sideOverlay.classList.remove('show');
+      renderHeader();
+      await loadMessages(meta.id);
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    }
+
+    function renderHeader(){
+      if(!currentChat){ hName.textContent='Kein Chat ausgewählt'; hStatus.textContent='—'; hAvatar.textContent='💬'; return; }
+      hName.textContent = currentChat.name || 'Chat';
+      hStatus.textContent = 'online';
+      if(currentChat.avatar_url){
+        const img = new Image(); img.src = currentChat.avatar_url; img.className='h-avatar';
+        hAvatar.replaceWith(img); img.id='hAvatar';
+      }else{
+        hAvatar.textContent = emojiFromTag(currentChat.tag);
+      }
+    }
+
+    // ====== Messages laden/anzeigen
+    async function loadMessages(chatId){
+      const { data, error } = await supa
+        .from('messages')
+        .select('id, role, text, created_at')
+        .eq('chat_id', chatId)
+        .order('created_at', { ascending:true });
+      if(error){ console.error(error); return; }
+      msgsEl.innerHTML='';
+      for(const m of data){ addBubble(m.role==='user'?'you':(m.role==='system'?'system':'ai'), m.text); }
+    }
+
+    function addBubble(role, text){
+      const b = document.createElement('div');
+      b.className = 'bubble ' + (role==='you'?'out':(role==='system'?'system':'in'));
+      b.innerText = text;
+      msgsEl.appendChild(b);
+    }
+
+    function showTyping(show){
+      const id='typingRow';
+      let r = document.getElementById(id);
+      if(show){
+        if(!r){
+          r = document.createElement('div'); r.id=id;
+          const b = document.createElement('div'); b.className='bubble in';
+          b.innerHTML = `schreibt… <span class="typing-dots"><span></span><span></span><span></span></span>`;
+          r.appendChild(b); msgsEl.appendChild(r);
+        }
+        hStatus.textContent='schreibt…';
+      }else{
+        if(r) r.remove(); hStatus.textContent='online';
+      }
+      msgsEl.scrollTop = msgsEl.scrollHeight;
+    }
+
+    // ====== Senden
+    sendBtn.onclick = sendMessage;
+    inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
+
+    async function sendMessage(){
+      if(!currentChat){ alert('Wähle oder starte einen Chat.'); return; }
+      const val = inputEl.value.trim(); if(!val) return;
+      inputEl.value='';
+      addBubble('you', val);
+      await supa.from('messages').insert({ chat_id: currentChat.id, role:'user', text: val });
+      await requestAI({ userText: val });
+    }
+
+    // ====== KI‑Call
+    async function requestAI(payload){
+      showTyping(true);
+      try{
+        // letzten Verlauf kompakt holen (nur Rolle/Text)
+        const { data: hist } = await supa
+          .from('messages')
+          .select('role,text')
+          .eq('chat_id', currentChat.id)
+          .order('created_at', { ascending:true })
+          .limit(20);
+        const history = (hist||[]).map(m=>({ role: m.role==='user'?'user':(m.role==='ai'?'assistant':'system'), content: m.text }));
+
+        const body = {
+          mode:'freechat',
+          persona: { name: currentChat.name, tag: currentChat.tag, desc: currentChat.desc },
+          history,
+          payload
+        };
+        const res = await fetch('/.netlify/functions/ai', {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify(body)
+        });
+        const txt = await res.text(); let data;
+        try{ data = JSON.parse(txt); }catch{ data = { messages:[{ role:'character', text:'(Antwort unlesbar)' }]}; }
+
+        const msgs = Array.isArray(data.messages)? data.messages: [];
+        for(const m of msgs){
+          const t = m.text || '';
+          addBubble('ai', t);
+          await supa.from('messages').insert({ chat_id: currentChat.id, role:'ai', text: t });
+        }
+        // einfache Memory‑Updates, wenn vorhanden
+        if (Array.isArray(data.memoryUpdates)) {
+          for (const kv of data.memoryUpdates) {
+            await supa.from('memories').upsert({
+              user_id: session.user.id,
+              persona_id: currentChat.persona_id,
+              key: kv.key, value: kv.value
+            }, { onConflict: 'user_id,persona_id,key' });
+          }
+        }
+      }catch(e){
+        addBubble('system','⚠️ Fehler: '+e.message);
+      }finally{
+        showTyping(false);
+        msgsEl.scrollTop = msgsEl.scrollHeight;
+      }
+    }
+  </script>
 </body>
 </html>
