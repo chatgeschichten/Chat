@@ -1,3 +1,21 @@
+<!-- =============================================
+=  CHATGESCHICHTEN • NEUE VOLL-VERSION (READY)  =
+=  Features:                                     =
+=   • Login (Supabase Magic‑Link)                =
+=   • Multi‑Chat (Sidebar/Desktop, Overlay/Mobil)=
+=   • Presets + Custom‑Charakter                 =
+=   • WhatsApp‑Dark‑Mode, fixes Header/Scroll    =
+=   • „schreibt…“-Indikator                      =
+=   • Kurze, persona‑typische KI‑Antworten       =
+=   • Speichern: Chats + Nachrichten + Persona   =
+=   • Memories (optional, günstig)               =
+=   • Env‑Fetch aus Netlify Function             =
+============================================== -->
+
+
+============================
+= FILE: /index.html        =
+============================
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -6,19 +24,13 @@
   <title>KI‑Chat • WhatsApp Dark</title>
   <meta name="theme-color" content="#0b141a" />
   <style>
-    :root{
-      --bg:#0b141a; --panel:#111b21; --panel2:#0a1014;
-      --in:#202c33; --out:#005c4b; --out-acc:#128c7e;
-      --text:#e9edef; --muted:#8696a0; --accent:#25d366;
-      --border:#1f2c34; --narr:#182229; --danger:#ff5c70;
-    }
+    :root{ --bg:#0b141a; --panel:#111b21; --panel2:#0a1014; --in:#202c33; --out:#005c4b; --out-acc:#128c7e; --text:#e9edef; --muted:#8696a0; --accent:#25d366; --border:#1f2c34; --narr:#182229; --danger:#ff5c70; }
     *{box-sizing:border-box}
     html,body{height:100%}
     body{margin:0;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,Segoe UI,Roboto,Inter,Arial,sans-serif}
-    /* Layout */
     .app{display:grid;grid-template-columns:340px 1fr;height:100dvh}
     @media(max-width:1000px){ .app{grid-template-columns:1fr} }
-    .sidebar{background:var(--panel2);border-right:1px solid var(--border);display:flex;flex-direction:column;position:relative}
+    .sidebar{background:var(--panel2);border-right:1px solid var(--border);display:flex;flex-direction:column}
     .side-header{display:flex;align-items:center;gap:8px;padding:12px 14px;border-bottom:1px solid var(--border)}
     .side-title{font-weight:600}
     .chatlist{flex:1;overflow:auto}
@@ -49,7 +61,6 @@
     .composer input{flex:1;border-radius:20px;border:1px solid var(--border);padding:12px 14px;background:#0e171f;color:var(--text)}
     .send{border-radius:20px;border:1px solid var(--out-acc);background:var(--out);color:var(--text);padding:10px 14px;cursor:pointer}
     .send:hover{background:var(--out-acc)}
-    .typing{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:12px}
     .typing-dots{display:inline-flex;gap:2px}
     .typing-dots span{display:inline-block;width:6px;height:6px;background:var(--muted);border-radius:50%;opacity:.5;animation:blink 1s infinite}
     .typing-dots span:nth-child(2){animation-delay:.15s}
@@ -70,7 +81,7 @@
     .char-key{font-size:12px;color:var(--muted)}
     .char-desc{padding:10px 12px;border-top:1px solid #0e171f;font-size:13px;color:var(--muted);display:none}
     .char.open .char-desc{display:block}
-    /* Sidebar-Overlay mobil */
+    /* Mobile Overlay */
     .side-overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;z-index:40}
     .side-drawer{position:absolute;left:0;top:0;bottom:0;width:86%;max-width:360px;background:var(--panel2);border-right:1px solid var(--border);transform:translateX(-100%);transition:.2s transform}
     .side-overlay.show{display:block}
@@ -79,7 +90,6 @@
 </head>
 <body>
   <div class="app">
-    <!-- Sidebar (Desktop) -->
     <aside class="sidebar" id="sidebarDesk">
       <div class="side-header">
         <div class="side-title">Chats</div>
@@ -88,7 +98,6 @@
       <div class="chatlist" id="chatList"></div>
     </aside>
 
-    <!-- Main -->
     <section class="main">
       <div class="topbar">
         <div class="top-left">
@@ -125,7 +134,7 @@
     </div>
   </div>
 
-  <!-- Startscreen -->
+  <!-- Startscreen mit Login -->
   <div class="start" id="start">
     <div class="start-inner">
       <div class="card">
@@ -135,19 +144,18 @@
           <button class="btn primary" id="startLoginBtn">Login</button>
         </div>
         <div class="grid" id="presetGrid"></div>
-
       </div>
       <div class="card">
         <h2 style="padding-left:12px">Eigenen Charakter erstellen</h2>
         <div style="padding:12px">
           <button class="btn primary" id="openCustom">+ Eigenen Charakter erstellen</button>
-          <p style="color:var(--muted);font-size:13px;margin-top:8px">Name, Schlagwort und Beschreibung festlegen. Optional Profilbild hochladen.</p>
+          <p style="color:var(--muted);font-size:13px;margin-top:8px">Name, Schlagwort & Beschreibung. (Login erforderlich)</p>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Custom Character (leichtgewichtig) -->
+  <!-- Modal: Custom Character (dialog) -->
   <dialog id="dlgCustom" style="max-width:520px;width:92%;border:none;border-radius:16px;padding:0;background:var(--panel);color:var(--text)">
     <form method="dialog" style="margin:0">
       <div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center">
@@ -157,7 +165,7 @@
       <div style="display:flex;flex-direction:column;gap:10px;padding:12px 14px">
         <label>Name</label><input id="cName" placeholder="z. B. Lena" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px">
         <label>Schlagwort</label><input id="cTag" placeholder="z. B. Flirt, Freund, Coach" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px">
-        <label>Beschreibung</label><textarea id="cDesc" rows="4" placeholder="Wie spricht die Person? (kurz, locker, jugendfreundlich, kein *Rollenspiel*)" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px"></textarea>
+        <label>Beschreibung</label><textarea id="cDesc" rows="4" placeholder="Wie spricht die Person? (kurz, locker, jugendfreundlich, keine Sternchen)" style="background:#0e171f;color:var(--text);border:1px solid var(--border);border-radius:10px;padding:10px"></textarea>
       </div>
       <div style="display:flex;gap:10px;justify-content:flex-end;padding:12px 14px;border-top:1px solid var(--border)">
         <button class="btn" value="cancel">Abbrechen</button>
@@ -166,342 +174,143 @@
     </form>
   </dialog>
 
-  <!-- Supabase + App Script -->
   <script type="module">
   import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
 
-  // 1) Env-Werte sicher aus Netlify holen
-  async function getEnv() {
-    const r = await fetch('/.netlify/functions/env', { cache: 'no-store' });
-    if (!r.ok) throw new Error('Env nicht verfügbar');
-    return r.json();
-  }
+  const $ = (q)=>document.querySelector(q);
+  const chatListDesk = $('#chatList');
+  const chatListMob  = $('#chatListMobile');
+  const msgsEl = $('#msgs');
+  const inputEl = $('#input');
+  const sendBtn = $('#send');
+  const startEl = $('#start');
+  const presetGrid = $('#presetGrid');
+  const hName = $('#hName'); const hStatus = $('#hStatus'); let hAvatar = $('#hAvatar');
+  const btnHamburger = $('#btnHamburger');
+  const sideOverlay = $('#sideOverlay'); const btnCloseSide = $('#btnCloseSide');
+  const btnLogin = $('#btnLogin'); const btnLogout = $('#btnLogout'); const startLoginBtn = $('#startLoginBtn');
+  const dlgCustom = $('#dlgCustom'); const openCustom = $('#openCustom'); const saveChar = $('#saveChar');
+  const newChatBtn = $('#newChatBtn');
 
-  // 2) App Bootstrap: erst Env, dann Supabase-Client, dann UI initialisieren
-  let supa = null;
-  let session = null;
+  const PRESETS = [
+    { key:'ratgeber', name:'Der Ratgeber', tag:'Coach', avatar:'💡', desc:'Konkrete Tipps. Ruhig, positiv. Kurze Antworten.' },
+    { key:'freund', name:'Bester Freund', tag:'Buddy', avatar:'👋', desc:'Locker, witzig, empathisch. Kein Rollenspiel.' },
+    { key:'nachbarin', name:'Heiße Nachbarin', tag:'Flirt', avatar:'🔥', desc:'Charmant, leicht frech, jugendfreundlich.' },
+    { key:'mysterio', name:'Geheimnisvoller Fremder', tag:'Mystery', avatar:'🕵️', desc:'Rätselhaft, knappe Andeutungen.' },
+    { key:'spass', name:'Spaßvogel', tag:'Comedy', avatar:'😂', desc:'Humor/Emojis sparsam. Punchlines.' },
+  ];
 
-  try {
-    const cfg = await getEnv();
-    supa = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY);
-  } catch (e) {
-    alert('Fehler: Supabase-Konfiguration fehlt.\n' + e.message);
-    // Brich NICHT komplett ab: zeig zumindest die Startseite
-  }
+  let supa = null; let session = null; let currentChat = null; // {id, persona_id, name, tag, desc, avatar_url}
 
+  // ----- Env aus Netlify holen, dann Supabase init -----
+  async function getEnv(){ const r = await fetch('/.netlify/functions/env', { cache:'no-store' }); if(!r.ok) throw new Error('Env fehlt'); return r.json(); }
+  try{ const cfg = await getEnv(); supa = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY); }catch(e){ alert('Fehler: Supabase-Konfig nicht geladen.'); }
 
-    const supa = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+  // ----- Auth -----
+  async function handleLoginClick(){ if(!supa) return alert('Supabase nicht initialisiert.'); const email = prompt('E-Mail für Magic‑Link Login:'); if(!email) return; const { error } = await supa.auth.signInWithOtp({ email }); if(error) alert('Login-Fehler: '+error.message); else alert('Check deine E‑Mails – Magic Link wurde gesendet.'); }
+  async function handleLogoutClick(){ await supa?.auth.signOut(); location.reload(); }
+  function wireAuthButtons(){ if(btnLogin) btnLogin.onclick = handleLoginClick; if(startLoginBtn) startLoginBtn.onclick = handleLoginClick; if(btnLogout) btnLogout.onclick = handleLogoutClick; }
+  wireAuthButtons();
 
-    // ====== UI-Refs
-    const $ = (q)=>document.querySelector(q);
-    const chatListDesk = $('#chatList');
-    const chatListMob  = $('#chatListMobile');
-    const msgsEl = $('#msgs');
-    const inputEl = $('#input');
-    const sendBtn = $('#send');
-    const startEl = $('#start');
-    const presetGrid = $('#presetGrid');
-    const hName = $('#hName'); const hStatus = $('#hStatus'); const hAvatar = $('#hAvatar');
-    const btnHamburger = $('#btnHamburger');
-    const sideOverlay = $('#sideOverlay'); const btnCloseSide = $('#btnCloseSide');
-    const btnLogin = $('#btnLogin'); const btnLogout = $('#btnLogout');
-    const dlgCustom = $('#dlgCustom'); const openCustom = $('#openCustom'); const saveChar = $('#saveChar');
-    const newChatBtn = $('#newChatBtn');
-    const startLoginBtn = document.getElementById('startLoginBtn');
+  supa?.auth.onAuthStateChange(async (_evt, sess)=>{
+    session = sess;
+    if(btnLogin)  btnLogin.style.display  = session ? 'none' : 'inline-block';
+    if(btnLogout) btnLogout.style.display = session ? 'inline-block' : 'none';
+    startEl.style.display='flex';
+    renderPresets();
+    if(session){ await loadChats(); }
+  });
 
-    // ====== App State
-    const PRESETS = [
-      { key:'ratgeber', name:'Der Ratgeber', tag:'Coach', avatar:'💡',
-        desc:'Gibt konkrete Tipps. Ruhig, positiv. Kurze Antworten ohne Sternchen.' },
-      { key:'freund', name:'Bester Freund', tag:'Buddy', avatar:'👋',
-        desc:'Locker, witzig, empathisch. Einfach chatten, kein Rollenspiel.' },
-      { key:'nachbarin', name:'Heiße Nachbarin', tag:'Flirt', avatar:'🔥',
-        desc:'Charmant, leicht frech, respektvoll (jugendfreundlich).' },
-      { key:'mysterio', name:'Geheimnisvoller Fremder', tag:'Mystery', avatar:'🕵️',
-        desc:'Rätselhaft, Andeutungen, kurze Gegenfragen.' },
-      { key:'spass', name:'Spaßvogel', tag:'Comedy', avatar:'😂',
-        desc:'Humor, Emojis sparsam. Kurze Punchlines.' },
-    ];
-
-    let session = null;
-    let currentChat = null; // {id, name, tag, desc, avatar_url, persona_id}
-
-    // ====== Auth
-    btnLogin.onclick = async () => {
-      const email = prompt('E-Mail für Magic‑Link Login:');
-      if(!email) return;
-      const { error } = await supa.auth.signInWithOtp({ email });
-      if (error) alert('Login-Fehler: '+error.message);
-      else alert('Check deine E‑Mails – Magic Link wurde gesendet.');
-    };
-    startLoginBtn.onclick = btnLogin.onclick;
-
-    btnLogout.onclick = async () => {
-      await supa.auth.signOut();
-      location.reload();
-    };
-
-    supa.auth.onAuthStateChange((_event, sess) => {
-      session = sess;
-      btnLogin.style.display = session ? 'none':'inline-block';
-      btnLogout.style.display = session ? 'inline-block':'none';
-      if(session){
-        startEl.style.display = 'flex'; // Auswahl erst nach Login
-        loadChats(); renderPresets();
-      }else{
-        startEl.style.display = 'flex';
-        renderPresets();
-      }
+  // ----- Presets / Start -----
+  function renderPresets(){
+    presetGrid.innerHTML='';
+    PRESETS.forEach(p=>{
+      const card = document.createElement('div'); card.className='char';
+      card.innerHTML = `
+        <div class="char-top">
+          <div class="avatar">${p.avatar}</div>
+          <div><div class="char-name">${p.name}</div><div class="char-key">${p.tag}</div></div>
+          <button class="btn" style="margin-left:auto" type="button">Details</button>
+        </div>
+        <div class="char-desc">${p.desc}</div>`;
+      const btn = card.querySelector('.btn'); btn.addEventListener('click', ()=> card.classList.toggle('open'));
+      card.addEventListener('dblclick', ()=>{ if(!session){ alert('Bitte zuerst einloggen (Button oben).'); return; } startChatFromPreset(p); });
+      presetGrid.appendChild(card);
     });
+    openCustom.onclick = () => dlgCustom.showModal();
+    saveChar.onclick = async (e)=>{ e.preventDefault(); if(!session){ alert('Bitte zuerst einloggen.'); return; } const name=$('#cName').value.trim()||'Eigener Charakter'; const tag=$('#cTag').value.trim()||'Individuell'; const desc=$('#cDesc').value.trim()||'Freundlich, kurz.'; await startChatWithPersona({ name, tag, description:desc, is_preset:false }); dlgCustom.close(); };
+  }
 
-    // ====== Presets + Start
-    function renderPresets(){
-      presetGrid.innerHTML = '';
-      PRESETS.forEach(p => {
-        const card = document.createElement('div'); card.className='char';
-        card.innerHTML = `
-          <div class="char-top">
-            <div class="avatar">${p.avatar}</div>
-            <div><div class="char-name">${p.name}</div><div class="char-key">${p.tag}</div></div>
-            <button class="btn" style="margin-left:auto" type="button">Details</button>
-          </div>
-          <div class="char-desc">${p.desc}</div>`;
-        const btn = card.querySelector('.btn');
-        btn.addEventListener('click', ()=> card.classList.toggle('open'));
-        card.addEventListener('dblclick', () => {
-          if (!session) {
-            alert('Bitte zuerst einloggen (Button oben im Startbildschirm).');
-            return;
-            }
-          startChatFromPreset(p);
-        });
+  newChatBtn.onclick = ()=> startEl.style.display='flex';
 
-        presetGrid.appendChild(card);
+  // ----- Sidebar Overlay (mobil) -----
+  btnHamburger.onclick = ()=> sideOverlay.classList.add('show');
+  btnCloseSide.onclick = ()=> sideOverlay.classList.remove('show');
+  sideOverlay.addEventListener('click', (e)=>{ if(!e.target.closest('.side-drawer')) sideOverlay.classList.remove('show'); });
+
+  // ----- Chats laden/anzeigen -----
+  async function loadChats(){ if(!session) return; const { data, error } = await supa.from('chats').select('id, created_at, title, personas (id, name, tag, description, avatar_url)').order('created_at',{ascending:false}); if(error){ console.error(error); return; } renderChatList(data||[]); }
+
+  function renderChatList(chats){
+    const render = (root)=>{
+      root.innerHTML='';
+      (chats||[]).forEach(row=>{
+        const persona = row.personas||{};
+        const item = document.createElement('div'); item.className='chat-item'; item.dataset.id=row.id;
+        const av = document.createElement('div'); av.className='avatar'; av.textContent = persona.avatar_url?'':(emojiFromTag(persona.tag)||'💬');
+        if(persona.avatar_url){ const img=new Image(); img.src=persona.avatar_url; img.className='avatar'; item.appendChild(img);} else item.appendChild(av);
+        const main=document.createElement('div'); main.className='ci-main'; const n=document.createElement('div'); n.className='ci-name'; n.textContent=persona.name||row.title||'Chat'; const l=document.createElement('div'); l.className='ci-last'; l.textContent='Tippe, um zu öffnen…'; main.append(n,l);
+        const meta=document.createElement('div'); meta.className='ci-meta'; meta.textContent=persona.tag||'';
+        item.append(main, meta);
+        item.onclick = ()=> openChat({ id:row.id, persona_id:persona.id, name:persona.name, tag:persona.tag, desc:persona.description, avatar_url:persona.avatar_url });
+        root.appendChild(item);
       });
-      openCustom.onclick = () => dlgCustom.showModal();
-      saveChar.onclick = async (e) => {
-        if (!session) {
-          alert('Bitte zuerst einloggen (Button im Startbildschirm).');
-        return;
-        }
+    };
+    render(chatListDesk); render(chatListMob);
+  }
 
-        e.preventDefault();
-        const name = $('#cName').value.trim() || 'Eigener Charakter';
-        const tag  = $('#cTag').value.trim() || 'Individuell';
-        const desc = $('#cDesc').value.trim() || 'Freundlich, natürlich, kurz.';
-        await startChatWithPersona({ name, tag, description: desc, isCustom:true });
-        dlgCustom.close();
-      };
+  function emojiFromTag(tag){ const t=(tag||'').toLowerCase(); if(t.includes('coach')) return '💡'; if(t.includes('freund')||t.includes('buddy')) return '👋'; if(t.includes('flirt')) return '🔥'; if(t.includes('myst')) return '🕵️'; if(t.includes('spaß')||t.includes('comedy')) return '😂'; return '💬'; }
+
+  async function startChatFromPreset(p){ const persona={ name:p.name, tag:p.tag, description:p.desc, avatar_url:'', is_preset:true }; await startChatWithPersona(persona); }
+
+  async function startChatWithPersona({ name, tag, description, avatar_url='', is_preset=false }){
+    if(!session){ alert('Bitte einloggen.'); return; }
+    const { data: personaRow, error: pErr } = await supa.from('personas').insert({ user_id: session.user.id, name, tag, description, avatar_url, is_preset }).select().single();
+    if(pErr){ console.error(pErr); alert('Persona-Fehler'); return; }
+    const { data: chatRow, error: cErr } = await supa.from('chats').insert({ user_id: session.user.id, persona_id: personaRow.id, title: name }).select('id, persona_id').single();
+    if(cErr){ console.error(cErr); alert('Chat-Fehler'); return; }
+    currentChat = { id: chatRow.id, persona_id: personaRow.id, name, tag, desc: description, avatar_url };
+    startEl.style.display='none'; sideOverlay.classList.remove('show'); renderHeader(); msgsEl.innerHTML='';
+    await requestAI({ start:true }); await loadChats();
+  }
+
+  async function openChat(meta){ currentChat = meta; startEl.style.display='none'; sideOverlay.classList.remove('show'); renderHeader(); await loadMessages(meta.id); msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+  function renderHeader(){ if(!currentChat){ hName.textContent='Kein Chat ausgewählt'; hStatus.textContent='—'; hAvatar.textContent='💬'; return; } hName.textContent=currentChat.name||'Chat'; hStatus.textContent='online'; if(currentChat.avatar_url){ const img=new Image(); img.src=currentChat.avatar_url; img.className='h-avatar'; hAvatar.replaceWith(img); hAvatar=img; hAvatar.id='hAvatar'; } else { hAvatar.textContent = emojiFromTag(currentChat.tag); } }
+
+  async function loadMessages(chatId){ const { data, error } = await supa.from('messages').select('id, role, text, created_at').eq('chat_id', chatId).order('created_at',{ascending:true}); if(error){ console.error(error); return; } msgsEl.innerHTML=''; for(const m of data){ addBubble(m.role==='user'?'you':(m.role==='system'?'system':'ai'), m.text); } }
+
+  function addBubble(role, text){ const b=document.createElement('div'); b.className='bubble '+(role==='you'?'out':(role==='system'?'system':'in')); b.innerText=text; msgsEl.appendChild(b); }
+  function showTyping(show){ const id='typingRow'; let r=document.getElementById(id); if(show){ if(!r){ r=document.createElement('div'); r.id=id; const b=document.createElement('div'); b.className='bubble in'; b.innerHTML=`schreibt… <span class="typing-dots"><span></span><span></span><span></span></span>`; r.appendChild(b); msgsEl.appendChild(r);} hStatus.textContent='schreibt…'; } else { if(r) r.remove(); hStatus.textContent='online'; } msgsEl.scrollTop = msgsEl.scrollHeight; }
+
+  sendBtn.onclick = sendMessage; inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
+  async function sendMessage(){ if(!currentChat){ alert('Wähle oder starte einen Chat.'); return; } const val=inputEl.value.trim(); if(!val) return; inputEl.value=''; addBubble('you', val); await supa.from('messages').insert({ chat_id: currentChat.id, role:'user', text: val }); await requestAI({ userText: val }); }
+
+  async function requestAI(payload){ showTyping(true); try{
+    const { data: hist } = await supa.from('messages').select('role,text').eq('chat_id', currentChat.id).order('created_at',{ascending:true}).limit(20);
+    const history = (hist||[]).map(m=>({ role: m.role==='user'?'user':(m.role==='ai'?'assistant':'system'), content: m.text }));
+    const body = { mode:'freechat', persona:{ name:currentChat.name, tag:currentChat.tag, desc:currentChat.desc }, history, payload };
+    const res = await fetch('/.netlify/functions/ai', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(body) });
+    const txt = await res.text(); let data; try{ data=JSON.parse(txt); }catch{ data={ messages:[{ role:'character', text:'(Antwort unlesbar)' }]}; }
+    const msgs = Array.isArray(data.messages)? data.messages: [];
+    for(const m of msgs){ const t=m.text||''; addBubble('ai', t); await supa.from('messages').insert({ chat_id: currentChat.id, role:'ai', text: t }); }
+    if(Array.isArray(data.memoryUpdates)){
+      for(const kv of data.memoryUpdates){ await supa.from('memories').insert({ user_id: session.user.id, persona_id: currentChat.persona_id, key: kv.key, value: kv.value }); }
     }
+  }catch(e){ addBubble('system','⚠️ Fehler: '+e.message); } finally { showTyping(false); msgsEl.scrollTop = msgsEl.scrollHeight; } }
 
-    newChatBtn.onclick = ()=> startEl.style.display='flex';
-
-    // ====== Sidebar Overlay (mobil) + Desktop-Fixes
-    btnHamburger.onclick = () => { sideOverlay.classList.add('show'); };
-    btnCloseSide.onclick = () => { sideOverlay.classList.remove('show'); };
-    sideOverlay.addEventListener('click', (e)=>{
-      if(!e.target.closest('.side-drawer')) sideOverlay.classList.remove('show');
-    });
-
-    // ====== Chats laden/anzeigen
-    async function loadChats(){
-      if(!session) return;
-      const { data, error } = await supa
-        .from('chats')
-        .select('id, created_at, title, personas (id, name, tag, description, avatar_url)')
-        .order('created_at', { ascending:false });
-      if(error){ console.error(error); return; }
-      renderChatList(data || []);
-    }
-
-    function renderChatList(chats){
-      const render = (root)=>{
-        root.innerHTML='';
-        (chats||[]).forEach(row=>{
-          const persona = row.personas || {};
-          const item = document.createElement('div'); item.className='chat-item'; item.dataset.id = row.id;
-          const av = document.createElement('div'); av.className='avatar'; av.textContent = persona.avatar_url ? '' : (emojiFromTag(persona.tag)||'💬');
-          if(persona.avatar_url){ const img = new Image(); img.src = persona.avatar_url; img.className='avatar'; item.appendChild(img); }
-          else item.appendChild(av);
-          const main = document.createElement('div'); main.className='ci-main';
-          const n = document.createElement('div'); n.className='ci-name'; n.textContent = persona.name || row.title || 'Chat';
-          const l = document.createElement('div'); l.className='ci-last'; l.textContent = 'Tippe, um zu öffnen…';
-          main.append(n,l);
-          const meta = document.createElement('div'); meta.className='ci-meta'; meta.textContent = persona.tag||'';
-          item.append(main, meta);
-          item.onclick = ()=> openChat({ id: row.id, persona_id: persona.id, name: persona.name, tag: persona.tag, desc: persona.description, avatar_url: persona.avatar_url });
-          root.appendChild(item);
-        });
-      };
-      render(chatListDesk);
-      render(chatListMob);
-    }
-
-    function emojiFromTag(tag){
-      const t = (tag||'').toLowerCase();
-      if(t.includes('coach')) return '💡';
-      if(t.includes('buddy')||t.includes('freund')) return '👋';
-      if(t.includes('flirt')) return '🔥';
-      if(t.includes('myst')) return '🕵️';
-      if(t.includes('comedy')||t.includes('spaß')) return '😂';
-      return '💬';
-    }
-
-    // ====== Chat starten (Preset oder Custom)
-    async function startChatFromPreset(p){
-      const persona = { name: p.name, tag: p.tag, description: p.desc, avatar_url: '', is_preset: true };
-      await startChatWithPersona(persona);
-    }
-
-    async function startChatWithPersona({ name, tag, description, avatar_url = '', isCustom = false, is_preset = false }){
-      if(!session){ alert('Bitte einloggen.'); return; }
-
-      // Persona anlegen (einfache Duplikate erlaubt, pro User)
-      const { data: personaRow, error: pErr } = await supa
-        .from('personas')
-        .insert({ user_id: session.user.id, name, tag, description, avatar_url, is_preset })
-        .select().single();
-      if(pErr){ console.error(pErr); alert('Persona-Fehler'); return; }
-
-      // Chat anlegen
-      const { data: chatRow, error: cErr } = await supa
-        .from('chats')
-        .insert({ user_id: session.user.id, persona_id: personaRow.id, title: name })
-        .select('id, persona_id').single();
-      if(cErr){ console.error(cErr); alert('Chat-Fehler'); return; }
-
-      currentChat = { id: chatRow.id, persona_id: personaRow.id, name, tag, desc: description, avatar_url };
-      startEl.style.display='none';
-      sideOverlay.classList.remove('show');
-      renderHeader(); msgsEl.innerHTML=''; // leer
-      await requestAI({ start:true });
-      await loadChats();
-    }
-
-    // ====== Chat öffnen
-    async function openChat(meta){
-      currentChat = meta;
-      startEl.style.display='none';
-      sideOverlay.classList.remove('show');
-      renderHeader();
-      await loadMessages(meta.id);
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-    }
-
-    function renderHeader(){
-      if(!currentChat){ hName.textContent='Kein Chat ausgewählt'; hStatus.textContent='—'; hAvatar.textContent='💬'; return; }
-      hName.textContent = currentChat.name || 'Chat';
-      hStatus.textContent = 'online';
-      if(currentChat.avatar_url){
-        const img = new Image(); img.src = currentChat.avatar_url; img.className='h-avatar';
-        hAvatar.replaceWith(img); img.id='hAvatar';
-      }else{
-        hAvatar.textContent = emojiFromTag(currentChat.tag);
-      }
-    }
-
-    // ====== Messages laden/anzeigen
-    async function loadMessages(chatId){
-      const { data, error } = await supa
-        .from('messages')
-        .select('id, role, text, created_at')
-        .eq('chat_id', chatId)
-        .order('created_at', { ascending:true });
-      if(error){ console.error(error); return; }
-      msgsEl.innerHTML='';
-      for(const m of data){ addBubble(m.role==='user'?'you':(m.role==='system'?'system':'ai'), m.text); }
-    }
-
-    function addBubble(role, text){
-      const b = document.createElement('div');
-      b.className = 'bubble ' + (role==='you'?'out':(role==='system'?'system':'in'));
-      b.innerText = text;
-      msgsEl.appendChild(b);
-    }
-
-    function showTyping(show){
-      const id='typingRow';
-      let r = document.getElementById(id);
-      if(show){
-        if(!r){
-          r = document.createElement('div'); r.id=id;
-          const b = document.createElement('div'); b.className='bubble in';
-          b.innerHTML = `schreibt… <span class="typing-dots"><span></span><span></span><span></span></span>`;
-          r.appendChild(b); msgsEl.appendChild(r);
-        }
-        hStatus.textContent='schreibt…';
-      }else{
-        if(r) r.remove(); hStatus.textContent='online';
-      }
-      msgsEl.scrollTop = msgsEl.scrollHeight;
-    }
-
-    // ====== Senden
-    sendBtn.onclick = sendMessage;
-    inputEl.addEventListener('keydown', (e)=>{ if(e.key==='Enter') sendMessage(); });
-
-    async function sendMessage(){
-      if(!currentChat){ alert('Wähle oder starte einen Chat.'); return; }
-      const val = inputEl.value.trim(); if(!val) return;
-      inputEl.value='';
-      addBubble('you', val);
-      await supa.from('messages').insert({ chat_id: currentChat.id, role:'user', text: val });
-      await requestAI({ userText: val });
-    }
-
-    // ====== KI‑Call
-    async function requestAI(payload){
-      showTyping(true);
-      try{
-        // letzten Verlauf kompakt holen (nur Rolle/Text)
-        const { data: hist } = await supa
-          .from('messages')
-          .select('role,text')
-          .eq('chat_id', currentChat.id)
-          .order('created_at', { ascending:true })
-          .limit(20);
-        const history = (hist||[]).map(m=>({ role: m.role==='user'?'user':(m.role==='ai'?'assistant':'system'), content: m.text }));
-
-        const body = {
-          mode:'freechat',
-          persona: { name: currentChat.name, tag: currentChat.tag, desc: currentChat.desc },
-          history,
-          payload
-        };
-        const res = await fetch('/.netlify/functions/ai', {
-          method:'POST', headers:{'Content-Type':'application/json'},
-          body: JSON.stringify(body)
-        });
-        const txt = await res.text(); let data;
-        try{ data = JSON.parse(txt); }catch{ data = { messages:[{ role:'character', text:'(Antwort unlesbar)' }]}; }
-
-        const msgs = Array.isArray(data.messages)? data.messages: [];
-        for(const m of msgs){
-          const t = m.text || '';
-          addBubble('ai', t);
-          await supa.from('messages').insert({ chat_id: currentChat.id, role:'ai', text: t });
-        }
-        // einfache Memory‑Updates, wenn vorhanden
-        if (Array.isArray(data.memoryUpdates)) {
-          for (const kv of data.memoryUpdates) {
-            await supa.from('memories').upsert({
-              user_id: session.user.id,
-              persona_id: currentChat.persona_id,
-              key: kv.key, value: kv.value
-            }, { onConflict: 'user_id,persona_id,key' });
-          }
-        }
-      }catch(e){
-        addBubble('system','⚠️ Fehler: '+e.message);
-      }finally{
-        showTyping(false);
-        msgsEl.scrollTop = msgsEl.scrollHeight;
-      }
-    }
   </script>
 </body>
 </html>
-
-
 
 
