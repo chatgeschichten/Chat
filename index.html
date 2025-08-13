@@ -207,6 +207,7 @@
     const btnLogin = $('#btnLogin'); const btnLogout = $('#btnLogout');
     const dlgCustom = $('#dlgCustom'); const openCustom = $('#openCustom'); const saveChar = $('#saveChar');
     const newChatBtn = $('#newChatBtn');
+    const startLoginBtn = document.getElementById('startLoginBtn');
 
     // ====== App State
     const PRESETS = [
@@ -233,6 +234,8 @@
       if (error) alert('Login-Fehler: '+error.message);
       else alert('Check deine E‑Mails – Magic Link wurde gesendet.');
     };
+    startLoginBtn.onclick = btnLogin.onclick;
+
     btnLogout.onclick = async () => {
       await supa.auth.signOut();
       location.reload();
@@ -265,11 +268,23 @@
           <div class="char-desc">${p.desc}</div>`;
         const btn = card.querySelector('.btn');
         btn.addEventListener('click', ()=> card.classList.toggle('open'));
-        card.addEventListener('dblclick', ()=> startChatFromPreset(p));
+        card.addEventListener('dblclick', () => {
+          if (!session) {
+            alert('Bitte zuerst einloggen (Button oben im Startbildschirm).');
+            return;
+            }
+          startChatFromPreset(p);
+        });
+
         presetGrid.appendChild(card);
       });
       openCustom.onclick = () => dlgCustom.showModal();
       saveChar.onclick = async (e) => {
+        if (!session) {
+          alert('Bitte zuerst einloggen (Button im Startbildschirm).');
+        return;
+        }
+
         e.preventDefault();
         const name = $('#cName').value.trim() || 'Eigener Charakter';
         const tag  = $('#cTag').value.trim() || 'Individuell';
@@ -486,6 +501,7 @@
   </script>
 </body>
 </html>
+
 
 
 
