@@ -207,7 +207,23 @@
   try{ const cfg = await getEnv(); supa = createClient(cfg.SUPABASE_URL, cfg.SUPABASE_ANON_KEY); }catch(e){ alert('Fehler: Supabase-Konfig nicht geladen.'); }
 
   // ----- Auth -----
-  async function handleLoginClick(){ if(!supa) return alert('Supabase nicht initialisiert.'); const email = prompt('E-Mail für Magic‑Link Login:'); if(!email) return; const { error } = await supa.auth.signInWithOtp({ email }); if(error) alert('Login-Fehler: '+error.message); else alert('Check deine E‑Mails – Magic Link wurde gesendet.'); }
+  async function handleLoginClick() {
+    if (!supa) { alert('Supabase nicht initialisiert.'); return; }
+    const email = prompt('E-Mail für Magic‑Link Login:');
+    if (!email) return;
+
+    const { error } = await supa.auth.signInWithOtp({
+      email,
+      options: {
+      // GANZ WICHTIG: exakt deine Domain
+      emailRedirectTo: 'https://chatgeschichtenki.netlify.app'
+    }
+  });
+
+  if (error) alert('Login-Fehler: ' + error.message);
+  else alert('Check deine E‑Mails – Magic‑Link wurde gesendet.');
+}
+
   async function handleLogoutClick(){ await supa?.auth.signOut(); location.reload(); }
   function wireAuthButtons(){ if(btnLogin) btnLogin.onclick = handleLoginClick; if(startLoginBtn) startLoginBtn.onclick = handleLoginClick; if(btnLogout) btnLogout.onclick = handleLogoutClick; }
   wireAuthButtons();
@@ -312,5 +328,6 @@
   </script>
 </body>
 </html>
+
 
 
